@@ -22,14 +22,14 @@ DataName = os.getcwd()+'\ExampleTrainData(AVG)\AvgDATA_17.csv'
 SourceData = pd.read_csv(DataName, encoding='utf-8')
 
 #迴歸分析 選擇要留下來的資料欄位
-#(風速,大氣壓力,溫度,濕度,光照度)
+#(溫度,濕度,光照度)
 #(發電量)
-Regression_X_train = SourceData[['WindSpeed(m/s)','Pressure(hpa)','Temperature(°C)','Humidity(%)','Sunlight(Lux)']].values
+Regression_X_train = SourceData[['Temperature(°C)','Humidity(%)','Sunlight(Lux)']].values
 Regression_y_train = SourceData[['Power(mW)']].values
 
 #LSTM 選擇要留下來的資料欄位
-#(風速,大氣壓力,溫度,濕度,光照度)
-AllOutPut = SourceData[['WindSpeed(m/s)','Pressure(hpa)','Temperature(°C)','Humidity(%)','Sunlight(Lux)']].values
+#(溫度,濕度,光照度)
+AllOutPut = SourceData[['Temperature(°C)','Humidity(%)','Sunlight(Lux)']].values
 
 #正規化
 LSTM_MinMaxModel = MinMaxScaler().fit(AllOutPut)
@@ -49,7 +49,7 @@ y_train = np.array(y_train)
 
 # Reshaping
 #(samples 是訓練樣本數量,timesteps 是每個樣本的時間步長,features 是每個時間步的特徵數量)
-X_train = np.reshape(X_train,(X_train.shape [0], X_train.shape [1], 5))
+X_train = np.reshape(X_train,(X_train.shape [0], X_train.shape [1], 3))
 
 
 
@@ -65,14 +65,14 @@ X_train = np.reshape(X_train,(X_train.shape [0], X_train.shape [1], 5))
 
 regressor = Sequential ()
 
-regressor.add(LSTM(units = 128, return_sequences = True, input_shape = (X_train.shape[1], 5)))
+regressor.add(LSTM(units = 128, return_sequences = True, input_shape = (X_train.shape[1], 3)))
 
 regressor.add(LSTM(units = 64))
 
 regressor.add(Dropout(0.2))
 
 # output layer
-regressor.add(Dense(units = 5))
+regressor.add(Dense(units = 3))
 regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 #開始訓練
@@ -120,8 +120,8 @@ print('R squared: ',RegressionModel.score(LSTM_MinMaxModel.transform(Regression_
 #%%
 #============================預測數據============================
 #載入模型
-regressor = load_model('WheatherLSTM_2024-09-23T01_10_50Z.h5')
-Regression = joblib.load('WheatherRegression_2024-09-23T01_10_53Z')
+regressor = load_model('WheatherLSTM_2024-11-13T19_46_02Z.h5')
+Regression = joblib.load('WheatherRegression_2024-11-13T19_46_25Z')
 
 
 #載入測試資料
@@ -145,7 +145,7 @@ while(count < len(EXquestion)):
   DataName = os.getcwd()+'\ExampleTrainData(IncompleteAVG)\IncompleteAvgDATA_'+ strLocationCode +'.csv'
   SourceData = pd.read_csv(DataName, encoding='utf-8')
   ReferTitle = SourceData[['Serial']].values
-  ReferData = SourceData[['WindSpeed(m/s)','Pressure(hpa)','Temperature(°C)','Humidity(%)','Sunlight(Lux)']].values
+  ReferData = SourceData[['Temperature(°C)','Humidity(%)','Sunlight(Lux)']].values
   
   inputs = []#重置存放參考資料
 
@@ -163,7 +163,7 @@ while(count < len(EXquestion)):
     
     #將新的預測值加入參考資料(用自己的預測值往前看)
     if i > 0 :
-      inputs.append(PredictOutput[i-1].reshape(1,5))
+      inputs.append(PredictOutput[i-1].reshape(1,3))
 
     #切出新的參考資料12筆(往前看12筆)
     X_test = []
@@ -171,7 +171,7 @@ while(count < len(EXquestion)):
     
     #Reshaping
     NewTest = np.array(X_test)
-    NewTest = np.reshape(NewTest, (NewTest.shape[0], NewTest.shape[1], 5))
+    NewTest = np.reshape(NewTest, (NewTest.shape[0], NewTest.shape[1], 3))
     
     predicted = regressor.predict(NewTest)
     PredictOutput.append(predicted)
