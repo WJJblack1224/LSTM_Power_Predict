@@ -9,14 +9,14 @@ df['Error'] = df['答案'] - df_predict['答案']
 
 # 計算 MSE
 mean_absolute_error = np.mean(df['Error'].abs())
-print(f"Mean Absolute Error (MSE): {mean_absolute_error}")
+print(f"Mean Absolute Error (MAE): {mean_absolute_error}")
 total_absolute_error = df['Error'].abs().sum()
-print(f"Total Absolute Error (MSE): {total_absolute_error}")
+print(f"Total Absolute Error (TSE): {total_absolute_error}")
 
 # 儲存誤差紀錄
 from datetime import datetime
 NowDateTime = datetime.now().strftime("%Y-%m-%dT%H_%M_%SZ")
-output_file = 'output'+ NowDateTime + '.txt'
+output_file = './log/output'+ NowDateTime + '.txt'
 
 # 將結果寫入文字檔
 with open(output_file, 'w') as file:
