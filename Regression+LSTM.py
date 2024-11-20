@@ -60,7 +60,11 @@ regressor = Sequential ()
 
 regressor.add(LSTM(units = 128, return_sequences = True, input_shape = (X_train.shape[1], 3)))
 
-regressor.add(LSTM(units = 64))
+regressor.add(LSTM(units = 64, return_sequences = True))
+
+regressor.add(Dropout(0.2))
+
+regressor.add(LSTM(units = 16 ))
 
 regressor.add(Dropout(0.2))
 
